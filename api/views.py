@@ -6,7 +6,6 @@ from multiprocessing import Process, Manager
 import api.main as main
 import os
 
-
 # Views
 @api_view(['GET'])
 def apiOverview(request):
@@ -32,7 +31,6 @@ def JobDetail(request, pk):
 	job = Job.objects.get(id=pk)
 	serializer = JobSerializer(job, many=False)
 	return Response(serializer.data)
-
 
 @api_view(['POST'])
 def JobCreate(request):

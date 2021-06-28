@@ -1,7 +1,6 @@
 import os
 import numpy as np
 from datetime import datetime
-from multiprocessing import Process
 from PIL import Image, ImageEnhance
 
 def renderImage(i, res_list, r_list, g_list, b_list, imagePath, return_dict):
@@ -45,83 +44,3 @@ def renderImage(i, res_list, r_list, g_list, b_list, imagePath, return_dict):
     print(f'Done job {i+1} of {len(res_list)}...')
 
     return_dict[i] = fileString
-
-if __name__ == '__main__':
-
-    # Get user input (or API)
-    res_list, r_list, g_list, b_list = ([] for i in range(4))
-    res, r, g, b = ('' for i in range(4))
-    pendingInput = True
-    while pendingInput:
-
-        while res not in ('10', '20', '60'):
-            res = input('Input spacial resolution (10, 20 or 60):')
-
-            if res == '10':
-                res_list.append(res)
-                accepted_list = ('B02', 'B03', 'B04', 'B08') 
-                while r not in accepted_list:
-                    r = input(f'Input R band {accepted_list}:')
-                r_list.append(r)
-                while g not in accepted_list:
-                    g = input(f'Input G band {accepted_list}:')
-                g_list.append(g)
-                while b not in accepted_list:
-                    b = input(f'Input B band {accepted_list}:')
-                b_list.append(b)
-
-            elif res == '20':
-                res_list.append(res)
-                accepted_list = ('B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B8A', 'B11', 'B12')
-                while r not in accepted_list:
-                    r = input(f'Input R band {accepted_list}:')
-                r_list.append(r)
-                while g not in accepted_list:
-                    g = input(f'Input G band {accepted_list}:')
-                g_list.append(g)
-                while b not in accepted_list:
-                    b = input(f'Input B band {accepted_list}:')
-                b_list.append(b)
-
-            elif res == '60':
-                res_list.append(res)
-                accepted_list = ('B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B8A', 'B09', 'B11', 'B12')
-                while r not in accepted_list:
-                    r = input(f'Input R band {accepted_list}:')
-                r_list.append(r)
-                while g not in accepted_list:
-                    g = input(f'Input G band {accepted_list}:')
-                g_list.append(g)
-                while b not in accepted_list:
-                    b = input(f'Input B band {accepted_list}:')
-                b_list.append(b)
-
-            else:
-                print("ERROR: Spacial resolution not valid.")
-
-        answer = input("Do you want to add another job? (y/n):")
-        if answer in ('y', 'Y'):
-            res, r, g, b = ('' for i in range(4))
-        else:
-            pendingInput = False
-
-    # Define image path
-    imagePath = './S2B_MSIL2A_20210605T110619_N0300_R137_T29TQH_20210605T143100.SAFE/GRANULE/L2A_T29TQH_A022185_20210605T111526/IMG_DATA/'
-
-    # Check if Output folder exists, else create it
-    if not os.path.exists('./Output'):
-        os.makedirs('Output')
-
-    processes = []
-    for i in range(len(res_list)):
-        p = Process(target=renderImage, args=[i, res_list, r_list, g_list, b_list, imagePath])
-        p.start()
-        processes.append(p)
-
-    for p in processes:
-        p.join()
-
-    print("Done batch job.")
-
-# 3) Implement parallel processing of this jobs for batches.
-# 4) Integrate with Django REST API
