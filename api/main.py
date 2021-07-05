@@ -1,10 +1,12 @@
-import os
 import numpy as np
 from datetime import datetime
 from PIL import Image, ImageEnhance
 
 def renderImage(i, res_list, r_list, g_list, b_list, imagePath, return_dict):
-
+    """Renders and image combining the 3 chosen bands of the chosen resolution from
+    the satellite imagery data package into an RGB color image, and stores the output
+    path name to the return dict.
+    """
     # Get res in path
     imagePathRes = imagePath + 'R' + res_list[i] + 'm/'
 
@@ -36,11 +38,12 @@ def renderImage(i, res_list, r_list, g_list, b_list, imagePath, return_dict):
     # Crop area of interest
     im_crop = im_output.crop((im_output.size[0]*1/4, im_output.size[1]*2/7, im_output.size[0]*3/4, im_output.size[1]*5/7))
 
-    # Get datetime now
+    # Get datetime now for filename
     now = datetime.now().strftime('%Y%m%d-%H%M%S')
     fileString = f'./Output/{now}_R{res_list[i]}m_{r_list[i]}_{g_list[i]}_{b_list[i]}.jpg'
     im_crop.save(fileString)
 
     print(f'Done job {i+1} of {len(res_list)}...')
 
+    # Save file path to return dict
     return_dict[i] = fileString

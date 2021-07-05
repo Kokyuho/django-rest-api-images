@@ -28,7 +28,7 @@ docker run --name=django-rest-api-images -e PYTHONUNBUFFERED=1 -p 8000:8000 djan
 ```
 
 **Using the REST API**:
-1) Navigate to '/api/' to see a list of the available API commands.
+1) Navigate to 'localhost:8000/api/' to see a list of the available API commands.
 
 2) Create a task with '/job-create/', e.g. giving:
 ```

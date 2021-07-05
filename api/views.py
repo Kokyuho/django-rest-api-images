@@ -10,9 +10,12 @@ import time
 import zipfile
 
 
-# Views
+#### API VIEWS ####
+
 @api_view(['GET'])
 def apiOverview(request):
+	"""Gives a list overview of the possible API commands to use.
+	"""
 	api_urls = {
 		'Job List':'/job-list/',
 		'Detail View':'/job-detail/<str:pk>/',
@@ -21,23 +24,37 @@ def apiOverview(request):
 		'Delete Job':'/job-delete/<str:pk>/',
 		'Run Job': '/job-run/<str:pk>/', # Returns primary key of job
 		}
-
 	return Response(api_urls)
 
 @api_view(['GET'])
 def jobList(request):
+	"""Shows a list of available jobs to process
+	"""
 	jobs = Job.objects.all().order_by('-id')
 	serializer = JobSerializer(jobs, many=True)
 	return Response(serializer.data)
 
 @api_view(['GET'])
 def JobDetail(request, pk):
+	"""Gives details of a particular batch job ID.
+	"""
 	job = Job.objects.get(id=pk)
 	serializer = JobSerializer(job, many=False)
 	return Response(serializer.data)
 
 @api_view(['POST'])
 def JobCreate(request):
+	"""Creates a new batch job for satellite imagery renderings. This must be followed
+	by a json object that includes at least the 4 lists (res_list, r_list, g_list and
+	b_list) with appropiate values.
+	Example JSON for a new batch job:
+	{
+		"res_list": "20,20,60",
+		"r_list": "B04,B12,B06",
+		"g_list": "B03,B11,B04",
+		"b_list": "B02,B03,B02"
+	}
+	"""
 	serializer = JobSerializer(data=request.data)
 
 	# Check data consistency
@@ -72,11 +89,13 @@ def JobCreate(request):
 
 	if serializer.is_valid():
 		serializer.save()
-
 	return Response(serializer.data)
 
 @api_view(['POST'])
 def JobUpdate(request, pk):
+	"""Updates a given batch job ID. A json object similar to the one in JobCreate must
+	be given.
+	"""
 	job = Job.objects.get(id=pk)
 	serializer = JobSerializer(instance=job, data=request.data)
 
@@ -88,6 +107,8 @@ def JobUpdate(request, pk):
 
 @api_view(['DELETE'])
 def JobDelete(request, pk):
+	"""Deletes a given batch job.
+	"""
 	job = Job.objects.get(id=pk)
 	job.delete()
 
@@ -95,13 +116,17 @@ def JobDelete(request, pk):
 
 @api_view(['GET'])
 def JobRun(request, pk):
-
+	"""Runs a satellite imagery rendering batch job given by its ID. If imagery folder
+	is not available, it will attempt to download and extract it first. This will
+	take quite some time, as the files are large. Then it will render the selected images
+	given by the lists utilizing multiprocessing.
+	"""
 	print("Starting job...")
 
 	# Get job
 	job = Job.objects.get(id=pk)
 
-	# Get user input (or API)
+	# Get lists
 	res_list = job.res_list.split(',')
 	r_list = job.r_list.split(',')
 	g_list = job.g_list.split(',')
@@ -128,11 +153,13 @@ def JobRun(request, pk):
 	if not os.path.exists('./Output'):
 		os.makedirs('Output')
 
-	# Start parallel processes
+	# Start parallel rendering processes
 	processes = []
 	manager = Manager()
-	return_dict = manager.dict()
+	return_dict = manager.dict() # This manager.dict() will hold the output values (paths)
 	for i in range(len(res_list)):
+
+		# Create a new process and start it
 		p = Process(target=main.renderImage, args=[i, res_list, r_list, g_list, b_list, imagePath, return_dict])
 		p.start()
 		processes.append(p)
@@ -141,6 +168,7 @@ def JobRun(request, pk):
 	for p in processes:
 		p.join()
 
+	# Print paths
 	print(return_dict.values())
 
 	# Change status to Done
