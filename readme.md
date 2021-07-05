@@ -13,10 +13,18 @@ UPDATE2: Satellite imagery folder will now automatically download if it is not a
 **Install requirements**:
 1) Clone the repository.
 2) Install dependencies (pip install -r requirements.txt) or, alternatively, run docker build.
+```
+docker build -t django-rest-api-images .
+```
 
 **Usage**:
 ```
 python manage.py runserver
+```
+
+**Usage with Docker**:
+```
+docker run --name=django-rest-api-images -e PYTHONUNBUFFERED=1 -p 8000:8000 django-rest-api-images
 ```
 
 **Using the REST API**:

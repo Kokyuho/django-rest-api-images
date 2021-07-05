@@ -31,10 +31,7 @@ def downloadFile(url, directory) :
     return (time.process_time() - start)
 
 def main() :
-    if len(sys.argv) > 1 :
-        url = sys.argv[1]
-    else :
-        url = "https://scihub.copernicus.eu/dhus/odata/v1/Products('bc88e6f3-7934-407a-82ab-2bbb26ec2cfe')/$value"
+    url = "https://scihub.copernicus.eu/dhus/odata/v1/Products('bc88e6f3-7934-407a-82ab-2bbb26ec2cfe')/$value"
     directory = "."
 
     time_elapsed = downloadFile(url, directory)
