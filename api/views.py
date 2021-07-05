@@ -111,7 +111,7 @@ def JobRun(request, pk):
 	if not os.path.exists('./S2B_MSIL2A_20210605T110619_N0300_R137_T29TQH_20210605T143100.SAFE'):
 		print("Satellite imagery file not found, attempting download now...")
 		time.sleep(5)
-		# api.download_file.main()
+		api.download_file.main()
 		filename = './$value.zip'
 		if os.path.exists(filename):
 			with zipfile.ZipFile(filename, 'r') as zip_ref:
