@@ -6,10 +6,13 @@ Each spectral band can be seen as a grey-scale image. A true color image can the
 
 This example Django REST API program lets the client programatically send a batch rendering job to the server and then run it, choosing the spacial resolution and the three bands to be combined to obtain the rendered images. The program will make use of parallel processing capabilities to process all the rendering jobs and store the images in an output folder. A list with the filenames of the images rendered will be returned that later another application could use to access the output files.
 
+UPDATE: Docker containarization is now possible. A Dockerfile has been added.
+
+UPDATE2: Satellite imagery folder will now automatically download if it is not available. This is a large file (900+ MB) so please be patient the first time you run the program.
+
 **Install requirements**:
 1) Clone the repository.
-2) Download and extract the following satellite image product in the same folder (large file, +900Mb): https://scihub.copernicus.eu/dhus/odata/v1/Products('bc88e6f3-7934-407a-82ab-2bbb26ec2cfe')/$value
-3) Install dependencies (pip install -r requirements.txt)
+2) Install dependencies (pip install -r requirements.txt) or, alternatively, run docker build.
 
 **Usage**:
 ```
@@ -38,7 +41,6 @@ elif res == '20':
 elif res == '60':
     accepted_list = ('B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B8A', 'B09', 'B11', 'B12')
 ```
-Note: Error handling and input checks were not implemented for simplicity in this example.
 
 3) Run the job with '/job-run/pk' where pk = primary key of the job. The server will start rendering the image combinations given in the lists (i=0, i=1,...) and will return the JSON object with status Done and Output the list of the output images locations.
 
