@@ -5,6 +5,10 @@ from .models import Job
 from multiprocessing import Process, Manager
 import api.main as main
 import os
+import api.download_file
+import time
+import zipfile
+
 
 # Views
 @api_view(['GET'])
@@ -35,6 +39,36 @@ def JobDetail(request, pk):
 @api_view(['POST'])
 def JobCreate(request):
 	serializer = JobSerializer(data=request.data)
+
+	# Check data consistency
+	# Get user input (or API)
+	res_list = request.data['res_list'].split(',')
+	r_list = request.data['r_list'].split(',')
+	g_list = request.data['g_list'].split(',')
+	b_list = request.data['b_list'].split(',')
+
+	# Check lists consistency
+	# Check spacial resolutions
+	for res in res_list:
+		if res not in ('10','20','60'):
+			raise ValueError('Some spacial resolution value given is not valid.')
+	# Check length of lists consistency
+	if len(res_list) != len(r_list) or \
+	   len(res_list) != len(g_list) or \
+	   len(res_list) != len(b_list):
+	   	raise ValueError('List lengths must be equal.')
+	# Check bands given depending on resolution
+	for list in [r_list, g_list, b_list]:
+		for i in range(len(list)):
+			if res_list[i] == '10':
+				if list[i] not in ('B02', 'B03', 'B04', 'B08'):
+					raise ValueError('Some band value given is not valid.')
+			elif res_list[i] == '20':
+				if list[i] not in ('B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B8A', 'B11', 'B12'):
+					raise ValueError('Some band value given is not valid.')
+			if res_list[i] == '60':
+				if list[i] not in ('B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B8A', 'B09', 'B11', 'B12'):
+					raise ValueError('Some band value given is not valid.')
 
 	if serializer.is_valid():
 		serializer.save()
@@ -73,6 +107,20 @@ def JobRun(request, pk):
 	g_list = job.g_list.split(',')
 	b_list = job.b_list.split(',')
     
+	# Check if satellite imagery folder exists, else download it
+	if not os.path.exists('./S2B_MSIL2A_20210605T110619_N0300_R137_T29TQH_20210605T143100.SAFE'):
+		print("Satellite imagery file not found, attempting download now...")
+		time.sleep(5)
+		# api.download_file.main()
+		filename = './$value.zip'
+		if os.path.exists(filename):
+			with zipfile.ZipFile(filename, 'r') as zip_ref:
+				zip_ref.extractall('.')
+
+	# Check one more time for good measure
+	if not os.path.exists('./S2B_MSIL2A_20210605T110619_N0300_R137_T29TQH_20210605T143100.SAFE'):
+		raise FileExistsError('Satellite imagery files not available.')
+
     # Define image path
 	imagePath = './S2B_MSIL2A_20210605T110619_N0300_R137_T29TQH_20210605T143100.SAFE/GRANULE/L2A_T29TQH_A022185_20210605T111526/IMG_DATA/'
 
